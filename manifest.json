@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "NotebookLM Chat",
+  "version": "0.2.0",
+  "description": "Adds a collaborative chat and threading feature to Google NotebookLM notes.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://notebooklm.google.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "firebase-app-compat.js",
+        "firebase-auth-compat.js",
+        "firebase-firestore-compat.js",
+        "firebase-analytics-compat.js"
+      ],
+      "matches": ["https://notebooklm.google.com/*"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://*.firebaseio.com wss://*.firebaseio.com https://notebooklm-chat-backend.firebaseapp.com https://firestore.googleapis.com;",
+    "sandbox": "sandbox allow-scripts; script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
+  }
+}

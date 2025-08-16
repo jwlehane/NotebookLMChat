@@ -1,0 +1,93 @@
+/* Main container for our injected UI */
+.nlc-chat-container {
+    margin-top: 12px;
+    padding: 8px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.nlc-chat-container h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+/* Thread display area */
+.nlc-thread-view {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+    padding-right: 5px;
+}
+
+/* Individual message styling */
+.nlc-message {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.nlc-message-author {
+    font-weight: 700;
+    color: #1a73e8;
+    font-size: 12px;
+}
+
+.nlc-message-text {
+    color: #3c4043;
+    white-space: pre-wrap; /* Respects newlines */
+}
+
+/* Input area for new replies */
+.nlc-reply-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+/* Button styling */
+.nlc-button {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    margin-right: 8px;
+    transition: background-color 0.2s;
+}
+
+.nlc-button:hover {
+    background-color: #185abc;
+}
+
+.nlc-secondary-button {
+    background-color: #f1f3f4;
+    color: #3c4043;
+}
+
+.nlc-secondary-button:hover {
+    background-color: #e8eaed;
+}
+
+/* Utility classes */
+.nlc-flex-container {
+    display: flex;
+    align-items: center;
+}
+
+.nlc-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
