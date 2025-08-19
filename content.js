@@ -10,6 +10,7 @@ function loadScript(src) {
 }
 
 async function loadFirebase() {
+    await loadScript(chrome.runtime.getURL('firebase-config.js'));
     await loadScript(chrome.runtime.getURL('firebase-app-compat.js'));
     await loadScript(chrome.runtime.getURL('firebase-auth-compat.js'));
     await loadScript(chrome.runtime.getURL('firebase-firestore-compat.js'));
@@ -20,16 +21,7 @@ async function loadFirebase() {
 console.log("NotebookLM Chat: content.js script has started.");
 
 // --- Firebase Configuration ---
-// Your specific Firebase project configuration.
-const firebaseConfig = {
-  apiKey: "AIzaSyBcfyji3kbhaARXSRfVqDXM1thFNlGAH7g",
-  authDomain: "notebooklm-chat-backend.firebaseapp.com",
-  projectId: "notebooklm-chat-backend",
-  storageBucket: "notebooklm-chat-backend.appspot.com",
-  messagingSenderId: "40641785063",
-  appId: "1:40641785063:web:340fb23cd88ed9548d8642",
-  measurementId: "G-JZGSR459TK"
-};
+// Firebase project configuration is loaded from firebase-config.js
 
 // --- Global Variables ---
 let db, auth, analytics;
