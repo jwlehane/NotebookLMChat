@@ -1,46 +1,85 @@
 # NotebookLM Chat Extension: Setup Guide
 
-This guide will walk you through setting up the NotebookLM Chat extension, including configuring Firebase for real-time messaging and loading the extension into Chrome.
+This guide will walk you through setting up the NotebookLM Chat extension. The process involves two main parts:
+1.  **Setting up a Firebase project** to act as the backend for the chat.
+2.  **Configuring the extension** with your Firebase project details.
 
-## Step 1: Create a Firebase Project
+---
 
-1.  Go to the Firebase Console.
+## Part 1: Set Up the Firebase Backend
+
+Before you can use the extension, you need a free Firebase project to handle real-time messaging and authentication.
+
+### 1. Create a Firebase Project
+1.  Go to the [Firebase Console](https://console.firebase.google.com/).
 2.  Click **Add project** and give your project a name (e.g., "notebooklm-chat-backend").
-3.  Continue through the setup steps. You can disable Google Analytics for this simple project if you wish.
-4.  Once your project is created, you'll be taken to the project dashboard.
+3.  Continue through the setup steps. You can disable Google Analytics if you wish.
 
-## Step 2: Get Your Firebase Configuration
-
-1.  On your project dashboard, click the **Web icon (`</>`)** to add a web app to your project.
+### 2. Get Your Firebase Web App Configuration
+1.  In your new project's dashboard, click the **Web icon (`</>`)** to add a web app.
 2.  Give the app a nickname (e.g., "NotebookLM Extension") and click **Register app**.
-3.  Firebase will show you your `firebaseConfig` object. It looks like this:
-    ```javascript
-    const firebaseConfig = {
-      apiKey: "AIza...",
-      authDomain: "your-project-id.firebaseapp.com",
-      // ... and so on
-    };
-    ```
-4.  Copy this entire object. You will need it for `content.js`.
+3.  After registering, Firebase will display a `firebaseConfig` object. **Keep this page open.** You will need to copy the values from this object in the next part of the setup.
 
-## Step 3: Set Up Firebase Services
+### 3. Enable Firebase Services
+You need to enable two services for the extension to work:
 
-### Authentication
+**A. Enable Anonymous Authentication:**
 1.  In the Firebase console, go to the **Authentication** section (from the left-hand Build menu).
-2.  Click the **Get started** button.
-3.  Go to the **Sign-in method** tab.
-4.  Click on **Anonymous** from the list of providers, enable it, and click **Save**.
+2.  Click **Get started**.
+3.  In the **Sign-in method** tab, select **Anonymous** from the list of providers, **enable it**, and click **Save**.
 
-### Firestore Database
+**B. Enable Firestore Database:**
 1.  Go to the **Firestore Database** section (from the left-hand Build menu).
 2.  Click **Create database**.
 3.  Choose to start in **Production mode** and click **Next**.
-4.  Select a Firestore location (choose one close to you). Click **Enable**.
-5.  After it's created, go to the **Rules** tab and replace the existing rules with the following to allow authenticated users to read/write:
+4.  Select a Firestore location (choose one close to you) and click **Enable**.
+5.  After the database is created, go to the **Rules** tab.
+6.  Replace the existing rules with the following to allow authenticated users to read and write to the database:
     ```
     rules_version = '2';
     service cloud.firestore {
+      match /databases/{database}/documents {
+        // Allow read/write access to authenticated users
+        match /{document=**} {
+          allow read, write: if request.auth != null;
+        }
+      }
     }
-  }
-}
-Publish your new rules.Step 4: Prepare the Extension FilesCreate a new folder on your computer (e.g., my-notebooklm-extension).Inside this folder, create three files: manifest.json, content.js, and styles.css.Copy the code I provided into the corresponding files.Crucially, in content.js, replace the placeholder firebaseConfig with the one you copied from your Firebase project.Download the Firebase JS SDK files: You need to provide the Firebase JS files for the import statements to work.Go to this page: https://firebase.google.com/docs/web/setup#access-sdk-from-zipDownload the zip file.From the zip, find and copy firebase-app.js, firebase-auth.js, and firebase-firestore.js into your extension folder.Step 5: Load the Extension in ChromeOpen Google Chrome and navigate to chrome://extensions.Enable "Developer mode" using the toggle switch in the top-right corner.Click the "Load unpacked" button.Select the folder you created in Step 4 (my-notebooklm-extension).The "NotebookLM Chat" extension should now appear in your list of extensions.Step 6: Test It!Navigate to https://notebooklm.google.com/.The first time it loads, you may be prompted to enter a display name.Open a notebook and click on or create a note in the right-hand panel.You should see the "Threaded Discussion" UI appear at the bottom of the note card. Try sending some messages! To test the collaborative aspect, you could load the unpacked extension on another Chrome profile or computer, connect it to the same Firebase project, and chat with yourself.Good luck, Johnny! This should give you a powerful and functional prototype. From here, you could refine the UI, add more robust user management (like Google Sign-In), or improve how the extension identifies notes on the page. Let me know how it goes!
+    ```
+7.  Click **Publish** to save your new rules.
+
+---
+
+## Part 2: Configure and Install the Extension
+
+Now that your Firebase backend is ready, you can configure the extension to connect to it.
+
+### 1. Run the Setup Script
+The easiest way to configure the extension is by using the included setup script.
+
+1.  **Open a terminal or command prompt** in the extension's root directory.
+2.  **Make the script executable** by running this command:
+    ```bash
+    chmod +x setup.sh
+    ```
+3.  **Run the script:**
+    ```bash
+    ./setup.sh
+    ```
+4.  The script will prompt you to enter the `firebaseConfig` values you got from the Firebase console in Part 1. Copy and paste them one by one.
+
+The script will automatically create a `config.js` file with your credentials.
+
+### 2. Load the Extension in Chrome
+1.  Open Google Chrome and navigate to `chrome://extensions`.
+2.  Enable **Developer mode** using the toggle switch in the top-right corner.
+3.  Click the **Load unpacked** button.
+4.  Select the folder containing the extension files (the folder where `manifest.json` is located).
+5.  The "NotebookLM Chat" extension should now appear in your list of extensions.
+
+### 3. Test It!
+-   Navigate to `https://notebooklm.google.com/`.
+-   The first time the extension runs, you may be prompted to enter a display name.
+-   Open a notebook and select a note. The "Threaded Discussion" UI should appear at the bottom of the note.
+
+That's it! Your collaborative chat extension is now running.

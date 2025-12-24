@@ -20,16 +20,7 @@ async function loadFirebase() {
 console.log("NotebookLM Chat: content.js script has started.");
 
 // --- Firebase Configuration ---
-// Your specific Firebase project configuration.
-const firebaseConfig = {
-  apiKey: "AIzaSyBcfyji3kbhaARXSRfVqDXM1thFNlGAH7g",
-  authDomain: "notebooklm-chat-backend.firebaseapp.com",
-  projectId: "notebooklm-chat-backend",
-  storageBucket: "notebooklm-chat-backend.appspot.com",
-  messagingSenderId: "40641785063",
-  appId: "1:40641785063:web:340fb23cd88ed9548d8642",
-  measurementId: "G-JZGSR459TK"
-};
+import { firebaseConfig } from './config.js';
 
 // --- Global Variables ---
 let db, auth, analytics;
