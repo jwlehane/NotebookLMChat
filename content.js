@@ -250,5 +250,13 @@ function simpleHash(str) {
     return 'note-' + Math.abs(hash);
 }
 
+// Export for testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { simpleHash };
+}
+
 // --- Entry Point ---
-main();
+// Only run main if not in a test environment (basic check)
+if (typeof module === 'undefined' || !module.exports) {
+    main();
+}
