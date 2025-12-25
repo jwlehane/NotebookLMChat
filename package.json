@@ -1,0 +1,15 @@
+{
+  "name": "notebooklm-chat-extension",
+  "version": "1.0.0",
+  "description": "Real-time chat for Google NotebookLM",
+  "scripts": {
+    "test": "npm run test:unit",
+    "test:unit": "jest",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "@playwright/test": "^1.40.0"
+  }
+}
