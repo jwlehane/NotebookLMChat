@@ -97,7 +97,11 @@ function observeNotebookLM() {
         }
         
         notes.forEach(note => {
-            const noteContent = note.innerText.trim();
+            // Optimization: Skip already injected notes to avoid expensive layout thrashing
+            if (note.dataset.nlcInjected) return;
+
+            // Optimization: Use textContent instead of innerText to avoid reflows
+            const noteContent = note.textContent.trim();
             const noteId = simpleHash(noteContent);
             
             if (noteContent && !injectedNotes.has(noteId)) {
@@ -105,6 +109,9 @@ function observeNotebookLM() {
                 console.log(`NotebookLM Chat: Found new note to inject. ID: ${noteId}`);
                 injectChatUI(note, noteId);
                 injectedNotes.add(noteId);
+
+                // Mark as injected on the DOM element itself for faster checking next time
+                note.dataset.nlcInjected = "true";
             }
         });
     });
