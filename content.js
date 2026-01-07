@@ -87,7 +87,8 @@ function observeNotebookLM() {
         // --- DIAGNOSTIC ---
         console.log("NotebookLM Chat: MutationObserver detected a change in the DOM.");
 
-        const notes = document.querySelectorAll(noteSelector);
+        // OPTIMIZATION: Ignore already injected notes to reduce processing overhead
+        const notes = document.querySelectorAll(noteSelector + ':not([data-nlc-injected])');
         
         // --- DIAGNOSTIC ---
         if (notes.length === 0) {
@@ -106,6 +107,9 @@ function observeNotebookLM() {
                 injectChatUI(note, noteId);
                 injectedNotes.add(noteId);
             }
+
+            // Mark note as processed so we don't re-query it next time
+            note.dataset.nlcInjected = 'true';
         });
     });
 
@@ -185,6 +189,10 @@ async function addMessageToThread(noteId, text) {
 }
 
 function listenToThread(noteId, threadViewElement) {
+    if (!db) {
+        console.warn("Firebase not initialized, skipping thread listener.");
+        return;
+    }
     const threadRef = db.collection('notebooklm-threads').doc(noteId).collection('messages');
     threadRef.orderBy('timestamp').onSnapshot(snapshot => {
         const messages = [];
@@ -252,7 +260,7 @@ function simpleHash(str) {
 
 // Export for testing
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { simpleHash };
+    module.exports = { simpleHash, observeNotebookLM, injectChatUI };
 }
 
 // --- Entry Point ---

@@ -1,0 +1,3 @@
+## 2024-05-23 - [Sandbox File Limits and Testing]
+**Learning:** The sandbox environment has strict file count limits that can be triggered by standard `npm install` or `pnpm install` commands, even with `node_modules/` in `.gitignore`. This effectively blocks running local tests that require heavy dependencies like `jest` or `playwright`.
+**Action:** When working in this constrained environment, prioritize static analysis (linting) and manual code verification. If dependencies cannot be installed, document the limitation, ensure the code is logically sound, and rely on the user's CI/CD or local environment for full verification. Do not loop endlessly trying to install packages if the environment rejects it.
