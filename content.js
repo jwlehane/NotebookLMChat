@@ -97,14 +97,22 @@ function observeNotebookLM() {
         }
         
         notes.forEach(note => {
+            // Optimization: Skip nodes we've already processed to avoid expensive innerText reads
+            if (note.dataset.nlcInjected) return;
+
             const noteContent = note.innerText.trim();
             const noteId = simpleHash(noteContent);
             
-            if (noteContent && !injectedNotes.has(noteId)) {
-                // --- DIAGNOSTIC ---
-                console.log(`NotebookLM Chat: Found new note to inject. ID: ${noteId}`);
-                injectChatUI(note, noteId);
-                injectedNotes.add(noteId);
+            if (noteContent) {
+                // Mark as processed immediately so we don't re-scan this node
+                note.dataset.nlcInjected = 'true';
+
+                if (!injectedNotes.has(noteId)) {
+                    // --- DIAGNOSTIC ---
+                    console.log(`NotebookLM Chat: Found new note to inject. ID: ${noteId}`);
+                    injectChatUI(note, noteId);
+                    injectedNotes.add(noteId);
+                }
             }
         });
     });
@@ -252,7 +260,12 @@ function simpleHash(str) {
 
 // Export for testing
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { simpleHash };
+    module.exports = {
+        simpleHash,
+        observeNotebookLM,
+        injectedNotes,
+        setDb: (newDb) => { db = newDb; }
+    };
 }
 
 // --- Entry Point ---
