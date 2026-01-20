@@ -8,8 +8,10 @@
     "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.40.0",
+    "globals": "^17.0.0",
     "jest": "^29.0.0",
-    "jest-environment-jsdom": "^29.0.0",
-    "@playwright/test": "^1.40.0"
+    "jest-environment-jsdom": "^29.7.0"
   }
 }

@@ -83,38 +83,53 @@ function observeNotebookLM() {
     const noteSelector = '.note-view'; 
     console.log(`NotebookLM Chat: Setting up MutationObserver to look for '${noteSelector}'`);
 
-    const observer = new MutationObserver((mutationsList, observer) => {
-        // --- DIAGNOSTIC ---
-        console.log("NotebookLM Chat: MutationObserver detected a change in the DOM.");
+    const processNote = (note) => {
+        // Optimization: Skip nodes we've already processed to avoid expensive innerText reads
+        if (note.dataset.nlcInjected) return;
 
-        const notes = document.querySelectorAll(noteSelector);
+        const noteContent = note.innerText.trim();
+        const noteId = simpleHash(noteContent);
         
-        // --- DIAGNOSTIC ---
-        if (notes.length === 0) {
-            console.log("NotebookLM Chat: No elements found with selector '.note-view'.");
-        } else {
-            console.log(`NotebookLM Chat: Found ${notes.length} note elements.`);
-        }
-        
-        notes.forEach(note => {
-            // Optimization: Skip nodes we've already processed to avoid expensive innerText reads
-            if (note.dataset.nlcInjected) return;
+        if (noteContent) {
+            // Mark as processed immediately so we don't re-scan this node
+            note.dataset.nlcInjected = 'true';
 
-            const noteContent = note.innerText.trim();
-            const noteId = simpleHash(noteContent);
-            
-            if (noteContent) {
-                // Mark as processed immediately so we don't re-scan this node
-                note.dataset.nlcInjected = 'true';
-
-                if (!injectedNotes.has(noteId)) {
-                    // --- DIAGNOSTIC ---
-                    console.log(`NotebookLM Chat: Found new note to inject. ID: ${noteId}`);
-                    injectChatUI(note, noteId);
-                    injectedNotes.add(noteId);
-                }
+            if (!injectedNotes.has(noteId)) {
+                // --- DIAGNOSTIC ---
+                console.log(`NotebookLM Chat: Found new note to inject. ID: ${noteId}`);
+                injectChatUI(note, noteId);
+                injectedNotes.add(noteId);
             }
-        });
+        }
+    };
+
+    // Initial scan to catch existing notes
+    const existingNotes = document.querySelectorAll(noteSelector);
+    if (existingNotes.length > 0) {
+        console.log(`NotebookLM Chat: Initial scan found ${existingNotes.length} note elements.`);
+        existingNotes.forEach(processNote);
+    }
+
+    const observer = new MutationObserver((mutationsList) => {
+        // Optimization: Iterate through mutations to find added nodes
+        // instead of re-scanning the entire document on every change.
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        // Check if the node itself is a note
+                        if (node.matches && node.matches(noteSelector)) {
+                            processNote(node);
+                        }
+                        // Check if the node contains notes
+                        if (node.querySelectorAll) {
+                            const nestedNotes = node.querySelectorAll(noteSelector);
+                            nestedNotes.forEach(processNote);
+                        }
+                    }
+                });
+            }
+        }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
