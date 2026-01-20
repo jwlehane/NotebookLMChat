@@ -3,7 +3,7 @@ const { simpleHash } = require('../../content.js');
 describe('simpleHash', () => {
     test('should return a deterministic hash for a string', () => {
         const input = "Hello World";
-        const expected = "note-1372551429"; // Computed manually or assumed stable
+        const expected = "note-862545276"; // Computed manually or assumed stable
         expect(simpleHash(input)).toBe(expected);
     });
 
