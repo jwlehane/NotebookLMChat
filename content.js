@@ -85,22 +85,15 @@ function observeNotebookLM() {
 
     const observer = new MutationObserver((mutationsList, observer) => {
         // --- DIAGNOSTIC ---
-        console.log("NotebookLM Chat: MutationObserver detected a change in the DOM.");
+        // console.log("NotebookLM Chat: MutationObserver detected a change in the DOM.");
 
-        const notes = document.querySelectorAll(noteSelector);
-        
-        // --- DIAGNOSTIC ---
-        if (notes.length === 0) {
-            console.log("NotebookLM Chat: No elements found with selector '.note-view'.");
-        } else {
-            console.log(`NotebookLM Chat: Found ${notes.length} note elements.`);
-        }
-        
-        notes.forEach(note => {
+        const processNote = (note) => {
             // Optimization: Skip nodes we've already processed to avoid expensive innerText reads
             if (note.dataset.nlcInjected) return;
 
-            const noteContent = note.innerText.trim();
+            // Use textContent if innerText is undefined (e.g. in some JSDOM envs or hidden elements)
+            const content = typeof note.innerText !== 'undefined' ? note.innerText : note.textContent;
+            const noteContent = content ? content.trim() : '';
             const noteId = simpleHash(noteContent);
             
             if (noteContent) {
@@ -114,7 +107,25 @@ function observeNotebookLM() {
                     injectedNotes.add(noteId);
                 }
             }
-        });
+        };
+
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        if (node.matches(noteSelector)) {
+                            processNote(node);
+                        }
+                        // Also check if the added node contains notes (e.g. a large container was added)
+                        // Use querySelectorAll only on the new node, not the whole document
+                        if (node.querySelectorAll) {
+                            const nestedNotes = node.querySelectorAll(noteSelector);
+                            nestedNotes.forEach(processNote);
+                        }
+                    }
+                });
+            }
+        }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
