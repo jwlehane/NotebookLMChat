@@ -79,42 +79,59 @@ async function main() {
 }
 
 // --- DOM Observation ---
+
+function processNote(note) {
+    // Optimization: Skip nodes we've already processed to avoid expensive innerText reads
+    if (note.dataset.nlcInjected) return;
+
+    const noteContent = note.innerText.trim();
+    const noteId = simpleHash(noteContent);
+
+    if (noteContent) {
+        // Mark as processed immediately so we don't re-scan this node
+        note.dataset.nlcInjected = 'true';
+
+        if (!injectedNotes.has(noteId)) {
+            // --- DIAGNOSTIC ---
+            console.log(`NotebookLM Chat: Found new note to inject. ID: ${noteId}`);
+            injectChatUI(note, noteId);
+            injectedNotes.add(noteId);
+        }
+    }
+}
+
 function observeNotebookLM() {
     const noteSelector = '.note-view'; 
     console.log(`NotebookLM Chat: Setting up MutationObserver to look for '${noteSelector}'`);
 
-    const observer = new MutationObserver((mutationsList, observer) => {
+    // Initial scan to handle existing notes
+    const initialNotes = document.querySelectorAll(noteSelector);
+    if (initialNotes.length > 0) {
+        console.log(`NotebookLM Chat: Found ${initialNotes.length} existing note elements.`);
+        initialNotes.forEach(processNote);
+    } else {
+        console.log("NotebookLM Chat: No elements found with selector '.note-view' initially.");
+    }
+
+    const observer = new MutationObserver((mutationsList) => {
         // --- DIAGNOSTIC ---
         console.log("NotebookLM Chat: MutationObserver detected a change in the DOM.");
 
-        const notes = document.querySelectorAll(noteSelector);
-        
-        // --- DIAGNOSTIC ---
-        if (notes.length === 0) {
-            console.log("NotebookLM Chat: No elements found with selector '.note-view'.");
-        } else {
-            console.log(`NotebookLM Chat: Found ${notes.length} note elements.`);
-        }
-        
-        notes.forEach(note => {
-            // Optimization: Skip nodes we've already processed to avoid expensive innerText reads
-            if (note.dataset.nlcInjected) return;
-
-            const noteContent = note.innerText.trim();
-            const noteId = simpleHash(noteContent);
-            
-            if (noteContent) {
-                // Mark as processed immediately so we don't re-scan this node
-                note.dataset.nlcInjected = 'true';
-
-                if (!injectedNotes.has(noteId)) {
-                    // --- DIAGNOSTIC ---
-                    console.log(`NotebookLM Chat: Found new note to inject. ID: ${noteId}`);
-                    injectChatUI(note, noteId);
-                    injectedNotes.add(noteId);
+        for (const mutation of mutationsList) {
+            for (const node of mutation.addedNodes) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    // Check if the added node itself is a note
+                    if (node.matches(noteSelector)) {
+                        processNote(node);
+                    }
+                    // Check if the added node contains notes (e.g. a container was added)
+                    if (node.querySelectorAll) {
+                         const nestedNotes = node.querySelectorAll(noteSelector);
+                         nestedNotes.forEach(processNote);
+                    }
                 }
             }
-        });
+        }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
