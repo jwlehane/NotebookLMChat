@@ -79,7 +79,6 @@ async function main() {
 }
 
 // --- DOM Observation ---
-
 function processNote(note) {
     // Optimization: Skip nodes we've already processed to avoid expensive innerText reads
     if (note.dataset.nlcInjected) return;
@@ -118,18 +117,20 @@ function observeNotebookLM() {
         console.log("NotebookLM Chat: MutationObserver detected a change in the DOM.");
 
         for (const mutation of mutationsList) {
-            for (const node of mutation.addedNodes) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    // Check if the added node itself is a note
-                    if (node.matches(noteSelector)) {
-                        processNote(node);
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        // Check if the node itself is a note
+                        if (node.matches(noteSelector)) {
+                            processNote(node);
+                        }
+                        // Check for notes inside the added node
+                        if (node.querySelectorAll) {
+                            const nestedNotes = node.querySelectorAll(noteSelector);
+                            nestedNotes.forEach(processNote);
+                        }
                     }
-                    // Check if the added node contains notes (e.g. a container was added)
-                    if (node.querySelectorAll) {
-                         const nestedNotes = node.querySelectorAll(noteSelector);
-                         nestedNotes.forEach(processNote);
-                    }
-                }
+                });
             }
         }
     });
